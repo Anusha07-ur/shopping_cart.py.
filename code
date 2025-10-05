@@ -1,0 +1,205 @@
+shopping_cart/
+│
+├── main.py                # CLI entry point
+├── products.py            # Contains predefined products
+├── cart_operations.py     # All cart functions
+└── utils.py               # Helper functions (find_product, etc.)
+# products.py
+# Predefined product list
+
+products = [
+    {"id": 1, "name": "Laptop", "price": 45000},
+    {"id": 2, "name": "Smartphone", "price": 15000},
+    {"id": 3, "name": "Headphones", "price": 2000},
+    {"id": 4, "name": "Keyboard", "price": 1200},
+    {"id": 5, "name": "Mouse", "price": 800},
+    {"id": 6, "name": "Charger", "price": 500},
+    {"id": 7, "name": "USB Cable", "price": 300},
+    {"id": 8, "name": "Backpack", "price": 2500}
+]
+# utils.py
+# Common helper functions
+
+def find_product(products, product_id):
+    """Find and return a product from the list by ID."""
+    for p in products:
+        if p["id"] == product_id:
+            return p
+    return None
+
+def find_cart_index(cart, product_id):
+    """Return index of product in cart or None."""
+    for i, item in enumerate(cart):
+        if item["id"] == product_id:
+            return i
+    return None
+# cart_operations.py
+from utils import find_product, find_cart_index
+
+MAX_CART_ITEMS = 8
+
+def view_products(products):
+    """Display all available products."""
+    print("\nAvailable Products:")
+    print("-" * 46)
+    print(f"{'ID':<4} {'Name':<20} {'Price (INR)':>16}")
+    print("-" * 46)
+    for p in products:
+        print(f"{p['id']:<4} {p['name']:<20} {p['price']:>16,.0f}")
+    print("-" * 46)
+
+
+def add_to_cart(products, cart, product_id, quantity):
+    """Add product to cart or update quantity."""
+    if quantity <= 0:
+        print("Quantity must be at least 1.")
+        return
+
+    product = find_product(products, product_id)
+    if not product:
+        print(f"Product ID {product_id} not found.")
+        return
+
+    idx = find_cart_index(cart, product_id)
+    if idx is not None:
+        cart[idx]["quantity"] += quantity
+        print(f"Updated '{cart[idx]['name']}' quantity to {cart[idx]['quantity']}.")
+    else:
+        if len(cart) >= MAX_CART_ITEMS:
+            print(f"Cannot add more than {MAX_CART_ITEMS} distinct items to the cart.")
+            return
+        cart.append({
+            "id": product["id"],
+            "name": product["name"],
+            "price": product["price"],
+            "quantity": quantity
+        })
+        print(f"Added '{product['name']}' (x{quantity}) to cart.")
+
+
+def view_cart(cart):
+    """Display cart contents and total price."""
+    if not cart:
+        print("\nYour cart is empty.")
+        return
+
+    print("\nYour Cart:")
+    print("-" * 70)
+    print(f"{'ID':<4} {'Name':<20} {'Price':>10} {'Qty':>8} {'Subtotal':>12}")
+    print("-" * 70)
+    total = 0
+    for item in cart:
+        subtotal = item["price"] * item["quantity"]
+        total += subtotal
+        print(f"{item['id']:<4} {item['name']:<20} {item['price']:>10,.0f} {item['quantity']:>8} {subtotal:>12,.0f}")
+    print("-" * 70)
+    print(f"{'Total':>56} : {total:>12,.0f}")
+    print("-" * 70)
+
+
+def update_cart(cart, product_id, quantity):
+    """Update product quantity in cart."""
+    idx = find_cart_index(cart, product_id)
+    if idx is None:
+        print(f"Product ID {product_id} not found in cart.")
+        return
+
+    if quantity <= 0:
+        removed = cart.pop(idx)
+        print(f"Removed '{removed['name']}' from cart.")
+    else:
+        cart[idx]["quantity"] = quantity
+        print(f"Updated '{cart[idx]['name']}' quantity to {quantity}.")
+
+
+def remove_from_cart(cart, product_id):
+    """Remove product from cart."""
+    idx = find_cart_index(cart, product_id)
+    if idx is None:
+        print(f"Product ID {product_id} not found in cart.")
+        return
+    removed = cart.pop(idx)
+    print(f"Removed '{removed['name']}' from cart.")
+
+
+def checkout(cart):
+    """Display bill and empty the cart."""
+    if not cart:
+        print("Cart is empty. Add items before checkout.")
+        return
+    print("\nCheckout - Final Bill")
+    view_cart(cart)
+    print("Thank you for shopping with us!")
+    cart.clear()
+# main.py
+from products import products
+from cart_operations import (
+    view_products, add_to_cart, view_cart,
+    update_cart, remove_from_cart, checkout
+)
+
+def menu():
+    """Main CLI loop."""
+    cart = []
+    while True:
+        print("\n===== Shopping Cart =====")
+        print("1. View Products")
+        print("2. Add to Cart")
+        print("3. View Cart")
+        print("4. Update Cart")
+        print("5. Remove from Cart")
+        print("6. Checkout")
+        print("7. Exit")
+        choice = input("Enter your choice (1-7): ").strip()
+
+        if choice == "1":
+            view_products(products)
+
+        elif choice == "2":
+            view_products(products)
+            try:
+                pid = int(input("Enter Product ID: "))
+                qty = int(input("Enter Quantity: "))
+            except ValueError:
+                print("Invalid input. Use numbers.")
+                continue
+            add_to_cart(products, cart, pid, qty)
+
+        elif choice == "3":
+            view_cart(cart)
+
+        elif choice == "4":
+            if not cart:
+                print("Cart is empty.")
+                continue
+            try:
+                pid = int(input("Enter Product ID to update: "))
+                qty = int(input("Enter new Quantity (0 to remove): "))
+            except ValueError:
+                print("Invalid input.")
+                continue
+            update_cart(cart, pid, qty)
+
+        elif choice == "5":
+            if not cart:
+                print("Cart is empty.")
+                continue
+            try:
+                pid = int(input("Enter Product ID to remove: "))
+            except ValueError:
+                print("Invalid input.")
+                continue
+            remove_from_cart(cart, pid)
+
+        elif choice == "6":
+            checkout(cart)
+
+        elif choice == "7":
+            print("Exiting... Goodbye!")
+            break
+
+        else:
+            print("Invalid choice. Try again.")
+
+if __name__ == "__main__":
+    menu()
