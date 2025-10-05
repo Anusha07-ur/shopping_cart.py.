@@ -1,0 +1,30 @@
+ Project Structure
+shopping_cart/
+│
+├── main.py                # CLI entry point (menu system)
+├── products.py            # Predefined product list
+├── cart_operations.py     # All cart-related functions
+└── utils.py               # Helper utility functions
+
+FeaturesRequirements
+Software Requirements
+
+Programming Language: Python 3.8 or higher
+
+Platform: Any system supporting Python (Windows, macOS, Linux)
+
+IDE/Text Editor: VS Code, PyCharm, or any Python IDE
+
+View Products – Displays a predefined list of products with their IDs, names, and prices.
+
+Add to Cart – Allows users to add selected products to the cart with a specific quantity.
+
+View Cart – Shows all items currently in the cart, including price, quantity, and subtotal.
+
+Update Cart – Enables users to change the quantity of a product already in the cart.
+
+Remove from Cart – Lets users remove unwanted products from the cart.
+
+Checkout – Displays the final bill with total amount and clears the cart after purchase.
+
+Exit Program – Safely ends the application.
